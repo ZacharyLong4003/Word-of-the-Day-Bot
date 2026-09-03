@@ -11,6 +11,9 @@ import random
 import tempfile
 import holidays
 
+USED_WORDS_PATH = "used_words.txt"
+reset_used_words = False
+
 def required_secret(name):
     value = os.getenv(name)
     if not value:
@@ -102,10 +105,28 @@ word = fetch_word_of_the_day(word_api_key)
 holiday, holiday_word = get_holiday_word()
 
 def fetch_random_word():
+    global reset_used_words
+
     words = [line.strip() for line in required_secret("WORD_LIST").splitlines() if line.strip()]
     if not words:
-        raise RuntimeError("WORD_LIST")
-    return random.choice(words)
+        raise RuntimeError("WORD_LIST must contain at least one word")
+
+    try:
+        with open(USED_WORDS_PATH, "r", encoding="utf-8") as used_words_file:
+            used_words = {line.strip().casefold() for line in used_words_file if line.strip()}
+    except FileNotFoundError:
+        used_words = set()
+
+    available_words = [word for word in words if word.casefold() not in used_words]
+    if not available_words:
+        reset_used_words = True
+        available_words = words
+    return random.choice(available_words)
+
+def save_used_word(word):
+    mode = "w" if reset_used_words else "a"
+    with open(USED_WORDS_PATH, mode, encoding="utf-8") as used_words_file:
+        used_words_file.write(f"{word}\n")
 
 # Do the word
 if holiday_word:
@@ -134,3 +155,6 @@ with tempfile.TemporaryDirectory() as temporary_directory:
 
     upload = api.media_upload(output_path)
     client.create_tweet(text=tweet_text, media_ids=[upload.media_id_string])
+
+    if not holiday and not (word and use_wordnik_word):
+        save_used_word(word)
