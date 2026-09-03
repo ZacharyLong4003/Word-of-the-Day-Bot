@@ -45,7 +45,8 @@ image_file_ids = {
 use_wordnik_word = False  # Set to True to use Wordnik word of the day, False for common words library
 
 # Get the current date
-current_date = datetime.now().strftime("%m/%d")
+current_datetime = datetime.now()
+current_date = current_datetime.strftime("%m/%d")
 
 # Text to include in the tweet
 tweet_text = f"{current_date}"
@@ -106,7 +107,7 @@ def fetch_random_word():
         raise RuntimeError("WORD_LIST")
     return random.choice(words)
 
-#Do the word
+# Do the word
 if holiday_word:
     word=holiday_word
     print("Holiday word drawn:", word)
@@ -118,8 +119,9 @@ else:
 
 tweet_text=tweet_text + " - " + word
 
-if (word[len(word)-2]=='e' or word[len(word)-2]=='o') and word[len(word)-1]=='r':
-        tweet_text=tweet_text + " her? I hardly know her (I am very sorry)"
+# If the day + month + year is cleanly divisible by 10 we can make the joke. Random could be used here but that's less fun. (ex 20 10 2020 = 2050 Good) 
+if (word[len(word)-2]=='e' or word[len(word)-2]=='o') and word[len(word)-1]=='r' and ((int(current_datetime.strftime("%d")) + int(current_datetime.strftime("%Y")) + int(current_datetime.strftime("%m"))) % 10 == 0):
+        tweet_text=tweet_text + " her? I hardly know her!"
 
 print(tweet_text)
 
