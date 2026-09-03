@@ -1,10 +1,6 @@
-# Don Cheadle WOTD Bot
+# WOTD Bot
 
-This is the code I used to create my Don Cheadle Word of the Day (WOTD) bot. The bot tweets a word once a day with the help of GitHub actions and Google drive
-
-## Disclaimer
-
-**I and this project are not associated with Don Cheadle in any form. I am not Don Cheadle.**
+This is the code I used to create my Word Of the day bot. The bot tweets a word once a day with the help of GitHub actions and Google drive
 
 ## Dependencies
 
