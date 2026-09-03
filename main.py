@@ -51,7 +51,7 @@ current_date = current_datetime.strftime("%m/%d")
 # Text to include in the tweet
 tweet_text = f"{current_date}"
 
-#Get the word of the day 
+# Get the word of the day
 
 def fetch_word_of_the_day(word_api_key):
     url = f"https://api.wordnik.com/v4/words.json/wordOfTheDay?api_key={word_api_key}"
@@ -119,7 +119,7 @@ else:
 
 tweet_text=tweet_text + " - " + word
 
-# If the day + month + year is cleanly divisible by 10 we can make the joke. Random could be used here but that's less fun. (ex 20 10 2020 = 2050 Good) 
+# If the day + month + year is cleanly divisible by 10 we can make the joke. Random could be used here but that's less fun. (ex 20 10 2020 = 2050 Good)
 if (word[len(word)-2]=='e' or word[len(word)-2]=='o') and word[len(word)-1]=='r' and ((int(current_datetime.strftime("%d")) + int(current_datetime.strftime("%Y")) + int(current_datetime.strftime("%m"))) % 10 == 0):
         tweet_text=tweet_text + " her? I hardly know her!"
 

@@ -23,26 +23,30 @@ def draw_text_on_image(text, image_path,
     draw = ImageDraw.Draw(image)
     image_width, image_height = image.size
 
+    def text_dimensions(value, selected_font):
+        left, top, right, bottom = draw.textbbox((0, 0), value, font=selected_font)
+        return right - left, bottom - top
+
     fixed_text_lines = ["Don Cheadle Word", "of the Day"]
     fixed_text_height = 0
     for line in fixed_text_lines:
-        fixed_text_width, line_height = draw.textsize(line, font=fixed_font)
+        fixed_text_width, line_height = text_dimensions(line, fixed_font)
         fixed_text_height += line_height
     fixed_text_height += len(fixed_text_lines) - 1
     fixed_y_pos = 10
 
     y_offset = fixed_y_pos
     for line in fixed_text_lines:
-        fixed_text_width, fixed_text_height = draw.textsize(line, font=fixed_font)
+        fixed_text_width, line_height = text_dimensions(line, fixed_font)
         fixed_x_pos = (image_width - fixed_text_width) // 2
         draw.text((fixed_x_pos - outline_width, y_offset), line, fill=outline_color, font=fixed_font)
         draw.text((fixed_x_pos + outline_width, y_offset), line, fill=outline_color, font=fixed_font)
         draw.text((fixed_x_pos, y_offset - outline_width), line, fill=outline_color, font=fixed_font)
         draw.text((fixed_x_pos, y_offset + outline_width), line, fill=outline_color, font=fixed_font)
         draw.text((fixed_x_pos, y_offset), line, fill=font_color, font=fixed_font)
-        y_offset += fixed_text_height + 1
+        y_offset += line_height + 1
 
-    text_width, text_height = draw.textsize(text, font=font)
+    text_width, text_height = text_dimensions(text, font)
     x_pos = (image_width - text_width) // 2
     y_pos = image_height - text_height - 10
 
