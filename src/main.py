@@ -101,7 +101,8 @@ def download_image(file_id, destination):
         image_file.write(response.content)
 
 # Fetch word of the day from the API
-word = fetch_word_of_the_day(word_api_key)
+if use_wordnik_word:
+    word = fetch_word_of_the_day(word_api_key)
 
 # Priority to holiday word if available, otherwise use word of the day
 holiday, holiday_word = get_holiday_word()
@@ -112,7 +113,6 @@ def fetch_random_word():
     words = [line.strip() for line in required_secret("WORD_LIST").splitlines() if line.strip()]
     if not words:
         raise RuntimeError("WORD_LIST must contain at least one word")
-
     try:
         with open(USED_WORDS_PATH, "r", encoding="utf-8") as used_words_file:
             used_words = {line.strip().casefold() for line in used_words_file if line.strip()}
