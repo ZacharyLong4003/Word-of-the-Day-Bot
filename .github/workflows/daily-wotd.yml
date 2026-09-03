@@ -1,0 +1,42 @@
+name: Daily Don Cheadle WOTD
+
+on:
+  schedule:
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+
+jobs:
+  tweet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Generate and tweet WOTD
+        env:
+          WORD_API_KEY: ${{ secrets.WORD_API_KEY }}
+          WORD_LIST: ${{ secrets.WORD_LIST }}
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
+          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+          IMAGE_FILE_ID_NEW_YEARS_DAY: ${{ secrets.IMAGE_FILE_ID_NEW_YEARS_DAY }}
+          IMAGE_FILE_ID_VALENTINES_DAY: ${{ secrets.IMAGE_FILE_ID_VALENTINES_DAY }}
+          IMAGE_FILE_ID_EASTER: ${{ secrets.IMAGE_FILE_ID_EASTER }}
+          IMAGE_FILE_ID_HALLOWEEN: ${{ secrets.IMAGE_FILE_ID_HALLOWEEN }}
+          IMAGE_FILE_ID_CHRISTMAS: ${{ secrets.IMAGE_FILE_ID_CHRISTMAS }}
+          IMAGE_FILE_ID_INDEPENDENCE_DAY: ${{ secrets.IMAGE_FILE_ID_INDEPENDENCE_DAY }}
+          IMAGE_FILE_ID_THANKSGIVING: ${{ secrets.IMAGE_FILE_ID_THANKSGIVING }}
+          IMAGE_FILE_ID_LABOR_DAY: ${{ secrets.IMAGE_FILE_ID_LABOR_DAY }}
+          IMAGE_FILE_ID_BASE: ${{ secrets.IMAGE_FILE_ID_BASE }}
+        run: python main.py

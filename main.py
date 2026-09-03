@@ -3,19 +3,43 @@
 
 import tweepy
 import drawer
-import nltk
 from datetime import datetime, date
+from io import BytesIO
+import os
 import requests
 import random
-import config
+import tempfile
 import holidays
 
-word_api_key=config.word_api_key
-auth = tweepy.OAuth1UserHandler(config.api_key, config.api_secret, config.access_token, config.access_token_secret)
-api = tweepy.API(auth)
-client = tweepy.Client(config.bearer_token, config.api_key, config.api_secret, config.access_token, config.access_token_secret)
+def required_secret(name):
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value
 
-default_don="images/the_don.png"
+
+word_api_key = required_secret("WORD_API_KEY")
+api_key = required_secret("TWITTER_API_KEY")
+api_secret = required_secret("TWITTER_API_SECRET")
+bearer_token = required_secret("TWITTER_BEARER_TOKEN")
+access_token = required_secret("TWITTER_ACCESS_TOKEN")
+access_token_secret = required_secret("TWITTER_ACCESS_TOKEN_SECRET")
+
+auth = tweepy.OAuth1UserHandler(api_key, api_secret, access_token, access_token_secret)
+api = tweepy.API(auth)
+client = tweepy.Client(bearer_token, api_key, api_secret, access_token, access_token_secret)
+
+image_file_ids = {
+    "New Year's Day": required_secret("IMAGE_FILE_ID_NEW_YEARS_DAY"),
+    "Valentine's Day": required_secret("IMAGE_FILE_ID_VALENTINES_DAY"),
+    "Easter": required_secret("IMAGE_FILE_ID_EASTER"),
+    "Halloween": required_secret("IMAGE_FILE_ID_HALLOWEEN"),
+    "Christmas Day": required_secret("IMAGE_FILE_ID_CHRISTMAS"),
+    "Independence Day": required_secret("IMAGE_FILE_ID_INDEPENDENCE_DAY"),
+    "Thanksgiving": required_secret("IMAGE_FILE_ID_THANKSGIVING"),
+    "Labor Day": required_secret("IMAGE_FILE_ID_LABOR_DAY"),
+    "default": required_secret("IMAGE_FILE_ID_BASE")
+}
 
 # Choose between Wordnik word of the day and common words library
 use_wordnik_word = False  # Set to True to use Wordnik word of the day, False for common words library
@@ -58,18 +82,17 @@ def get_holiday_word():
             return holiday, random.choice(holiday_words[holiday])
     return None, None
 
-def get_holiday_image_path(holiday):
-    holiday_images = {
-        "New Year's Day": "images/new_years_day.png",
-        "Valentine's Day": "images/valentines_day.png",
-        "Easter": "images/easter.png",
-        "Halloween": "images/halloween.png",
-        "Christmas Day": "images/christmas.png",
-        "Independence Day": "images/independence_day.png",
-        "Thanksgiving": "images/thanksgiving.png",
-        "Labor Day": "images/labor_day.png"
-    }
-    return holiday_images.get(holiday, default_don)
+def download_image(file_id, destination):
+    url = f"https://drive.usercontent.google.com/download?id={file_id}&export=download&confirm=t"
+    response = requests.get(url, timeout=30)
+    response.raise_for_status()
+    try:
+        from PIL import Image
+        Image.open(BytesIO(response.content)).verify()
+    except (OSError, ValueError) as error:
+        raise RuntimeError(f"Google Drive file {file_id} not working ") from error
+    with open(destination, "wb") as image_file:
+        image_file.write(response.content)
 
 # Fetch word of the day from the API
 word = fetch_word_of_the_day(word_api_key)
@@ -77,10 +100,11 @@ word = fetch_word_of_the_day(word_api_key)
 # Priority to holiday word if available, otherwise use word of the day
 holiday, holiday_word = get_holiday_word()
 
-def fetch_random_oxford_word():
-    with open("oxford_5000.txt", "r") as file:
-        oxford_words = file.read().splitlines()
-    return random.choice(oxford_words)
+def fetch_random_word():
+    words = [line.strip() for line in required_secret("WORD_LIST").splitlines() if line.strip()]
+    if not words:
+        raise RuntimeError("WORD_LIST")
+    return random.choice(words)
 
 #Do the word
 if holiday_word:
@@ -89,12 +113,8 @@ if holiday_word:
 elif word and use_wordnik_word:
     print("Word of the day drawn from Wordnik:", word)
 else:
-    word = fetch_random_oxford_word()
-    print("Random word drawn from Oxford 5000 word list:", word)
-
-image_path = get_holiday_image_path(holiday) if holiday else default_don
-
-drawer.draw_text_on_image(word, image_path)
+    word = fetch_random_word()
+    print("Random word drawn from WORD_LIST:", word)
 
 tweet_text=tweet_text + " - " + word
 
@@ -103,15 +123,12 @@ if (word[len(word)-2]=='e' or word[len(word)-2]=='o') and word[len(word)-1]=='r'
 
 print(tweet_text)
 
-# Path to the image
-image_path = "C:/Users/zane1/Desktop/Don Cheadle Bot/output.jpg"
+with tempfile.TemporaryDirectory() as temporary_directory:
+    source_path = os.path.join(temporary_directory, "source_image")
+    output_path = os.path.join(temporary_directory, "output.jpg")
+    file_id = image_file_ids.get(holiday, image_file_ids["default"])
+    download_image(file_id, source_path)
+    drawer.draw_text_on_image(word, source_path, output_path=output_path)
 
-# Upload the image
-upload = api.media_upload(image_path)
-
-# Extract the media ID
-media_id = upload.media_id_string
-
-# Post tweet with image
-
-client.create_tweet(text=tweet_text, media_ids=[media_id])
+    upload = api.media_upload(output_path)
+    client.create_tweet(text=tweet_text, media_ids=[upload.media_id_string])
