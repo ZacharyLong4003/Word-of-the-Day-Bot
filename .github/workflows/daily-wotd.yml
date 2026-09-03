@@ -1,4 +1,4 @@
-name: Daily Don Cheadle WOTD
+name: Daily
 
 on:
   schedule:
