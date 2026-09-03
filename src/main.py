@@ -6,12 +6,14 @@ import drawer
 from datetime import datetime, date
 from io import BytesIO
 import os
+from pathlib import Path
 import requests
 import random
 import tempfile
 import holidays
 
-USED_WORDS_PATH = "used_words.txt"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+USED_WORDS_PATH = PROJECT_ROOT / "used_words.txt"
 reset_used_words = False
 
 def required_secret(name):

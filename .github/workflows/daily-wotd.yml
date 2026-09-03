@@ -46,7 +46,7 @@ jobs:
           IMAGE_FILE_ID_THANKSGIVING: ${{ secrets.IMAGE_FILE_ID_THANKSGIVING }}
           IMAGE_FILE_ID_LABOR_DAY: ${{ secrets.IMAGE_FILE_ID_LABOR_DAY }}
           IMAGE_FILE_ID_BASE: ${{ secrets.IMAGE_FILE_ID_BASE }}
-        run: python main.py
+        run: python src/main.py
 
       - name: Save used word history
         run: |

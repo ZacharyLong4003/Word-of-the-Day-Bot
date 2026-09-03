@@ -10,6 +10,12 @@ To get this project up and running, you'll need to install the following Python 
 pip install -r requirements.txt
 ```
 
+Run the bot from the repository root with:
+
+```sh
+python src/main.py
+```
+
 ## Configuration
 
 Credentials are read from environment variables. In GitHub Actions, create repository secrets with these names and map them to the job environment:
