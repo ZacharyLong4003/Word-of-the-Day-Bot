@@ -2,6 +2,7 @@ name: Daily WOTD
 
 on:
   schedule:
+    - cron: "0 17 * * *"
     - cron: "0 18 * * *"
   workflow_dispatch:
 
@@ -28,7 +29,17 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
 
+      - name: Check Central time
+        id: central-time
+        run: |
+          if [ "$(TZ=America/Chicago date +%H)" = "12" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Generate and tweet WOTD
+        if: steps.central-time.outputs.run == 'true' || github.event_name == 'workflow_dispatch'
         env:
           WORD_API_KEY: ${{ secrets.WORD_API_KEY }}
           WORD_LIST: ${{ secrets.WORD_LIST }}

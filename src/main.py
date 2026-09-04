@@ -101,6 +101,7 @@ def download_image(file_id, destination):
         image_file.write(response.content)
 
 # Fetch word of the day from the API
+word = None
 if use_wordnik_word:
     word = fetch_word_of_the_day(word_api_key)
 
