@@ -6,3 +6,4 @@ classic
 monitor
 risky
 perception
+bored
