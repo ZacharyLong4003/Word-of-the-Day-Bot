@@ -29,3 +29,4 @@ conservative
 protocol
 reassure
 alcohol
+partly
