@@ -59,3 +59,4 @@ entire
 motor
 penalty
 grandmother
+shopping
