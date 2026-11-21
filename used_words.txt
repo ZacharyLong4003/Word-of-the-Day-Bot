@@ -74,3 +74,4 @@ aggression
 abandon
 heat
 breakthrough
+know
